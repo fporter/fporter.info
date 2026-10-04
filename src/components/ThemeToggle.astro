@@ -12,7 +12,10 @@
     aria-expanded="false"
     title="Color theme / Tema visual"
   >
-    <span id="theme-active-icon" class="theme-active-icon">📜</span>
+    <span id="theme-active-icon" class="theme-active-icon">
+      <span class="ico-theme ico-sloth">☼</span>
+      <span class="ico-theme ico-slate">☾</span>
+    </span>
     <svg class="theme-chevron" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <polyline points="6 9 12 15 18 9"></polyline>
     </svg>
@@ -22,34 +25,18 @@
   <div id="theme-dropdown" class="theme-dropdown" role="menu" aria-label="Available themes">
     <div class="theme-dropdown-header">THEME</div>
 
-    <button class="theme-option" data-theme-val="white" role="menuitem">
+    <button class="theme-option" data-theme-val="sloth" role="menuitem">
       <span class="theme-opt-left">
-        <span class="theme-emoji">☀️</span>
-        <span class="theme-label">Clean White</span>
-      </span>
-      <svg class="theme-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-    </button>
-
-    <button class="theme-option" data-theme-val="cream" role="menuitem">
-      <span class="theme-opt-left">
-        <span class="theme-emoji">📜</span>
-        <span class="theme-label">Warm Paper</span>
+        <span class="theme-emoji">☼</span>
+        <span class="theme-label">Light</span>
       </span>
       <svg class="theme-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
     </button>
 
     <button class="theme-option" data-theme-val="slate" role="menuitem">
       <span class="theme-opt-left">
-        <span class="theme-emoji">⚓</span>
-        <span class="theme-label">Slate Navy</span>
-      </span>
-      <svg class="theme-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-    </button>
-
-    <button class="theme-option" data-theme-val="midnight" role="menuitem">
-      <span class="theme-opt-left">
-        <span class="theme-emoji">🌌</span>
-        <span class="theme-label">Midnight OLED</span>
+        <span class="theme-emoji">☾</span>
+        <span class="theme-label">Dark</span>
       </span>
       <svg class="theme-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
     </button>
@@ -58,7 +45,7 @@
 
     <button class="theme-option" data-theme-val="auto" role="menuitem">
       <span class="theme-opt-left">
-        <span class="theme-emoji">💻</span>
+        <span class="theme-emoji">☾☼</span>
         <span class="theme-label">System Auto</span>
       </span>
       <svg class="theme-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
@@ -102,6 +89,10 @@
     align-items: center;
     justify-content: center;
   }
+
+  .ico-theme { display: none; }
+  :global(html[data-theme="sloth"]) .ico-sloth,
+  :global(html[data-theme="slate"]) .ico-slate { display: inline; }
 
   .theme-chevron {
     opacity: 0.6;
@@ -234,30 +225,18 @@
     const btn = document.getElementById('theme-toggle-btn');
     const dropdown = document.getElementById('theme-dropdown');
     const selector = document.getElementById('theme-selector');
-    const activeIcon = document.getElementById('theme-active-icon');
-
-    const themeIcons: Record<string, string> = {
-      white: '☀️',
-      cream: '📜',
-      slate: '⚓',
-      midnight: '🌌',
-      auto: '💻',
-    };
+    // const activeIcon = document.getElementById('theme-active-icon');
 
     function getEffectiveTheme(mode: string): string {
       if (mode === 'auto') {
-        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'slate' : 'cream';
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'slate' : 'sloth';
       }
       return mode;
     }
 
     function updateThemeUI(storedTheme: string) {
+      // return;
       const effectiveTheme = getEffectiveTheme(storedTheme);
-      
-      // Update icon on the button
-      if (activeIcon) {
-        activeIcon.textContent = storedTheme === 'auto' ? '💻' : (themeIcons[effectiveTheme] || '📜');
-      }
 
       // Update active checks in dropdown
       document.querySelectorAll<HTMLButtonElement>('.theme-option').forEach((opt) => {
@@ -307,7 +286,7 @@
     }
 
     // Initialize UI on mount
-    const saved = localStorage.getItem('minrock_theme') || 'cream';
+    const saved = localStorage.getItem('minrock_theme') || 'auto';
     updateThemeUI(saved);
 
     // Toggle dropdown
@@ -361,7 +340,7 @@
 
     // Listen to OS theme changes if on auto
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-      const current = localStorage.getItem('minrock_theme') || 'cream';
+      const current = localStorage.getItem('minrock_theme') || 'auto';
       if (current === 'auto') {
         applyTheme('auto');
       }

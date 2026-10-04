@@ -34,7 +34,7 @@ export interface SiteConfig {
   description: string;
   author: string;
   siteUrl: string;
-  defaultTheme: 'white' | 'cream' | 'slate' | 'midnight';
+  defaultTheme: 'sloth' | 'slate';
   features?: SiteFeatures;
   socialLinks: {
     github?: string;
@@ -51,7 +51,7 @@ export interface SiteConfig {
     provider: 'scatterleaf';
     repo: string;
     category?: string;
-    theme?: 'auto' | 'light' | 'dark' | 'cream' | 'midnight' | 'slate';
+    theme?: 'auto' | 'light' | 'dark' | 'sloth' | 'slate';
     lang?: string;
     broker?: string;
     clientId?: string;
@@ -69,15 +69,15 @@ export interface SiteConfig {
 }
 
 export const siteConfig: SiteConfig = {
-  title: 'Minrock',
-  tagline: 'Raw ideas from your personal vault, finely polished into an ultra-fast static blog.',
-  description: 'Minimalist, typography-first Astro 7 theme crafted for technical writers and Obsidian vaults. Pure SSG, zero bloat.',
-  author: 'Renato Rezende',
+  title: 'Forrest Porter',
+  tagline: 'Food. Travel. Code.',
+  description: 'Personal blog and project showcase.',
+  author: 'Forrest Porter',
   // Substitua pelo seu domínio de produção (usado para SEO Canônico, OpenGraph e RSS)
   // Replace with your production domain (used for Canonical SEO, OpenGraph and RSS feeds)
   // Can be overridden via environment variable (e.g. Vercel: SITE_URL=https://yourdomain.com)
-  siteUrl: (typeof process !== 'undefined' && process.env?.SITE_URL) || (import.meta as any).env?.SITE_URL || 'https://minrock.vercel.app',
-  defaultTheme: 'cream',
+  siteUrl: (typeof process !== 'undefined' && process.env?.SITE_URL) || (import.meta as any).env?.SITE_URL || 'https://fporter.info',
+  defaultTheme: 'sloth',
   // Granular Feature Flags — "Complete by default, minimalist on demand"
   // Toggle any feature to false to completely omit markup & scripts in static build
   features: {
@@ -93,9 +93,9 @@ export const siteConfig: SiteConfig = {
     comments: true
   },
   socialLinks: {
-    github: 'https://github.com/rnt-rez/minrock',
-    linkedin: 'https://example.com/',
-    email: 'https://example.com/'
+    github: 'https://github.com/fporter',
+    linkedin: 'https://www.linkedin.com/in/forrestporter',
+    email: 'contact@fporter.info'
   },
   navLinks: [
     { title: 'Home', href: '/' },
@@ -107,11 +107,11 @@ export const siteConfig: SiteConfig = {
   comments: {
     enabled: true,
     provider: 'scatterleaf',
-    repo: 'rnt-rez/minrock',
+    repo: 'fporter/fporter.info',
     category: 'General',
     theme: 'auto',
     lang: 'auto',
-    clientId: 'Iv23liZHApvnx6e6wtMJ',
+    clientId: '',
     // 🍃 DEFAULT: Showcase Mode (broker: '')
     // Out of the box, broker defaults to '' (empty). ScatterLeaf runs in an interactive,
     // safe sandbox with simulated mock comments in browser memory — zero external setup,

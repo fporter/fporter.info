@@ -29,16 +29,16 @@ const topTags = [...tagsMap.entries()]
 <BaseLayout>
   <section class="hero">
     <h1 class="hero-title">
-      Crafted for deep thinking &amp; technical writing.
+      {siteConfig.description}
     </h1>
     <p class="hero-subtitle">
       {siteConfig.tagline}
     </p>
-    <div class="hero-actions">
+    <!-- div class="hero-actions">
       <a href="/blog" class="btn btn-primary">Read Articles →</a>
       <a href="/projects" class="btn btn-secondary">Explore Projects</a>
       <a href="/about" class="btn btn-tertiary">About Minrock</a>
-    </div>
+    </div -->
   </section>
 
   <!-- Latest Notes -->
@@ -104,7 +104,7 @@ const topTags = [...tagsMap.entries()]
 
 <style>
   .hero {
-    padding: 2.5rem 0 3rem;
+    padding: 2.5rem 0 1rem;
     border-bottom: 1px solid var(--border);
     margin-bottom: 2.5rem;
   }

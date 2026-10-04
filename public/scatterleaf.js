@@ -2815,7 +2815,7 @@ button.sl-pinned-badge-clickable:active {
 }
 
 /* 1. Cream (Warm Paper / Marginalia) */
-:host([theme="cream"]) {
+:host([theme="sloth"]) {
   --sl-bg: #f7f4ea;
   --sl-surface: #ffffff;
   --sl-tab-bg: #f0ebe0;
@@ -3738,7 +3738,7 @@ class De extends HTMLElement {
     super();
     c(this, "_repo", "");
     c(this, "_category", "General");
-    c(this, "_theme", "cream");
+    c(this, "_theme", "sloth");
     c(this, "_lang", "pt");
     c(this, "_inputPosition", "top");
     c(this, "_broker", "");
@@ -3995,7 +3995,7 @@ class De extends HTMLElement {
     }
   }
   syncAttributes() {
-    this._repo = this.getAttribute("repo") || "", this._category = this.getAttribute("category") || "General", this._theme = this.getAttribute("theme") || "cream", this._lang = this.getAttribute("lang") || "auto", this._broker = this.getAttribute("broker") || "", this._clientId = this.getAttribute("client-id") || "Iv23liZHApvnx6e6wtMJ";
+    this._repo = this.getAttribute("repo") || "", this._category = this.getAttribute("category") || "General", this._theme = this.getAttribute("theme") || "sloth", this._lang = this.getAttribute("lang") || "auto", this._broker = this.getAttribute("broker") || "", this._clientId = this.getAttribute("client-id") || "Iv23liZHApvnx6e6wtMJ";
     const e = this.getAttribute("input-position");
     (e === "top" || e === "bottom") && (this._inputPosition = e);
     const t = this.getAttribute("page-size");
@@ -4133,8 +4133,10 @@ class De extends HTMLElement {
         if (p) {
           const $ = Math.min(255, Math.round(s.r + 15)), P = Math.min(255, Math.round(s.g + 18)), R = Math.min(255, Math.round(s.b + 22));
           k = `rgb(${$}, ${P}, ${R})`, y = "rgba(0, 0, 0, 0.35)", w = "rgba(255, 255, 255, 0.12)", L = `rgba(${d.r}, ${d.g}, ${d.b}, 0.62)`, x = `rgb(${Math.min(255, l.r + 30)}, ${Math.min(255, l.g + 30)}, ${Math.min(255, l.b + 30)})`, A = `rgba(${l.r}, ${l.g}, ${l.b}, 0.16)`, z = `rgba(${l.r}, ${l.g}, ${l.b}, 0.35)`;
-        } else
-          k = "rgba(255, 255, 255, 0.96)", y = "rgba(0, 0, 0, 0.035)", w = "rgba(0, 0, 0, 0.12)", L = `rgba(${d.r}, ${d.g}, ${d.b}, 0.65)`, x = `rgb(${l.r}, ${l.g}, ${l.b})`, A = `rgba(${l.r}, ${l.g}, ${l.b}, 0.12)`, z = `rgba(${l.r}, ${l.g}, ${l.b}, 0.28)`;
+        } else {
+          const $ = Math.min(255, Math.round(s.r + 15)), P = Math.min(255, Math.round(s.g + 18)), R = Math.min(255, Math.round(s.b + 22));
+          k = `rgb(${$}, ${P}, ${R})`, y = "rgba(0, 0, 0, 0.035)", w = "rgba(0, 0, 0, 0.12)", L = `rgba(${d.r}, ${d.g}, ${d.b}, 0.65)`, x = `rgb(${l.r}, ${l.g}, ${l.b})`, A = `rgba(${l.r}, ${l.g}, ${l.b}, 0.12)`, z = `rgba(${l.r}, ${l.g}, ${l.b}, 0.28)`;
+        }
         const D = `rgb(${l.r}, ${l.g}, ${l.b})`;
         this.style.setProperty("--sl-bg", `rgb(${s.r}, ${s.g}, ${s.b})`), this.style.setProperty("--sl-surface", k), this.style.setProperty("--sl-tab-bg", y), this.style.setProperty("--sl-border", w), this.style.setProperty("--sl-text", `rgb(${d.r}, ${d.g}, ${d.b})`), this.style.setProperty("--sl-text-muted", L), this.style.setProperty("--sl-accent", D), this.style.setProperty("--sl-accent-hover", D), this.style.setProperty("--sl-mention-color", x), this.style.setProperty("--sl-mention-bg", A), this.style.setProperty("--sl-mention-border", z), p ? (this.style.setProperty("--sl-btn-primary-bg", "#1f6feb"), this.style.setProperty("--sl-btn-primary-hover", "#388bfd")) : (this.style.setProperty("--sl-btn-primary-bg", D), this.style.setProperty("--sl-btn-primary-hover", D));
       } catch (e) {
