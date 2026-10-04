@@ -1,0 +1,8 @@
+{
+  "name": "fporter-info",
+  "compatibility_date": "2026-10-03", // Update to the day you deploy
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS"
+  }
+}
