@@ -50,6 +50,9 @@ const { selector = '.post-content', title = '', label = 'Listen to Article' } = 
     <div class="audio-drawer-content">
       <div class="audio-drawer-divider" aria-hidden="true"></div>
 
+      <!-- Shown when the browser/OS has no usable speech voices -->
+      <p id="audio-unavailable-msg" class="audio-unavailable-msg hidden" role="status"></p>
+
       <!-- Controls Row -->
       <div class="audio-controls-row">
         <!-- Play / Pause -->
@@ -112,6 +115,7 @@ const { selector = '.post-content', title = '', label = 'Listen to Article' } = 
 
 <script>
   let activeStickyObserver: IntersectionObserver | null = null;
+  let activeVoicesController: AbortController | null = null;
   let audioPlayerGlobalInitialized = false;
 
   function setupAudioPlayer() {
@@ -119,6 +123,10 @@ const { selector = '.post-content', title = '', label = 'Listen to Article' } = 
     if (activeStickyObserver) {
       activeStickyObserver.disconnect();
       activeStickyObserver = null;
+    }
+    if (activeVoicesController) {
+      activeVoicesController.abort();
+      activeVoicesController = null;
     }
 
     const root = document.getElementById('audio-player-root');
@@ -130,7 +138,7 @@ const { selector = '.post-content', title = '', label = 'Listen to Article' } = 
     }
 
     const toggleBtn = document.getElementById('audio-toggle-btn');
-    const playBtn = document.getElementById('audio-play-btn');
+    const playBtn = document.getElementById('audio-play-btn') as HTMLButtonElement | null;
     const stopBtn = document.getElementById('audio-stop-btn') as HTMLButtonElement | null;
     const prevBtn = document.getElementById('audio-prev-btn') as HTMLButtonElement | null;
     const nextBtn = document.getElementById('audio-next-btn') as HTMLButtonElement | null;
@@ -142,6 +150,7 @@ const { selector = '.post-content', title = '', label = 'Listen to Article' } = 
     const partLabel = document.getElementById('audio-part-label');
     const pctLabel = document.getElementById('audio-pct-label');
     const progressFill = document.getElementById('audio-progress-fill');
+    const unavailableMsg = document.getElementById('audio-unavailable-msg');
     const iconPlay = playBtn?.querySelector('.icon-play');
     const iconPause = playBtn?.querySelector('.icon-pause');
 
@@ -210,6 +219,81 @@ const { selector = '.post-content', title = '', label = 'Listen to Article' } = 
     // Detect language
     const pageLang = document.documentElement.lang || 'en';
     const targetLang = pageLang.startsWith('pt') ? 'pt-BR' : 'en-US';
+
+    // Voice availability: speechSynthesis can exist with zero voices (e.g. Linux
+    // without speech-dispatcher), in which case speak() silently does nothing.
+    const voicesController = new AbortController();
+    activeVoicesController = voicesController;
+    let voicesUnavailable = false;
+
+    function waitForVoices(timeoutMs = 1500): Promise<SpeechSynthesisVoice[]> {
+      const voices = synth.getVoices();
+      if (voices.length) return Promise.resolve(voices);
+      // Chrome populates voices asynchronously and fires 'voiceschanged' when ready
+      return new Promise((resolve) => {
+        const done = () => {
+          window.clearTimeout(timer);
+          synth.removeEventListener('voiceschanged', done);
+          resolve(synth.getVoices());
+        };
+        const timer = window.setTimeout(done, timeoutMs);
+        synth.addEventListener('voiceschanged', done);
+      });
+    }
+
+    function pickVoice(): SpeechSynthesisVoice | null {
+      const voices = synth.getVoices();
+      const langPrefix = targetLang.slice(0, 2).toLowerCase();
+      return (
+        voices.find((v) => v.lang === targetLang) ||
+        voices.find((v) => v.lang.toLowerCase().startsWith(langPrefix)) ||
+        voices.find((v) => v.default) ||
+        voices[0] ||
+        null
+      );
+    }
+
+    function showUnavailable(reason: 'no-voices' | 'audio-hardware' = 'no-voices') {
+      voicesUnavailable = true;
+      const isPt = targetLang.startsWith('pt');
+      const message =
+        reason === 'audio-hardware'
+          ? isPt
+            ? 'Nenhum dispositivo de saída de áudio disponível.'
+            : 'No audio output device is available.'
+          : isPt
+            ? 'Nenhuma voz de texto para fala está disponível neste dispositivo ou navegador.'
+            : 'No text-to-speech voices are available on this device or browser.';
+      if (unavailableMsg) {
+        unavailableMsg.textContent = message;
+        unavailableMsg.classList.remove('hidden');
+      }
+      if (playBtn) playBtn.disabled = true;
+      root?.classList.add('is-unavailable');
+      updateUI();
+    }
+
+    function clearUnavailable() {
+      voicesUnavailable = false;
+      unavailableMsg?.classList.add('hidden');
+      if (playBtn) playBtn.disabled = false;
+      root?.classList.remove('is-unavailable');
+      updateUI();
+    }
+
+    waitForVoices().then((voices) => {
+      if (voicesController.signal.aborted) return;
+      if (!voices.length) showUnavailable();
+    });
+
+    // Voices may be installed/loaded later in the session
+    synth.addEventListener(
+      'voiceschanged',
+      () => {
+        if (voicesUnavailable && synth.getVoices().length) clearUnavailable();
+      },
+      { signal: voicesController.signal }
+    );
 
     function setExpanded(expanded: boolean) {
       if (expanded) {
@@ -303,6 +387,8 @@ const { selector = '.post-content', title = '', label = 'Listen to Article' } = 
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = targetLang;
       utterance.rate = rates[currentRateIdx];
+      const voice = pickVoice();
+      if (voice) utterance.voice = voice;
 
       utterance.onstart = () => {
         isPlaying = true;
@@ -324,6 +410,16 @@ const { selector = '.post-content', title = '', label = 'Listen to Article' } = 
       utterance.onerror = (e) => {
         if (e.error === 'canceled' || e.error === 'interrupted') return;
         stopPlayback();
+        if (e.error === 'audio-hardware') {
+          showUnavailable('audio-hardware');
+        } else if (
+          e.error === 'synthesis-unavailable' ||
+          e.error === 'synthesis-failed' ||
+          e.error === 'voice-unavailable' ||
+          e.error === 'language-unavailable'
+        ) {
+          showUnavailable();
+        }
       };
 
       synth.speak(utterance);
@@ -349,15 +445,22 @@ const { selector = '.post-content', title = '', label = 'Listen to Article' } = 
         iconPlay?.classList.remove('hidden');
         iconPause?.classList.add('hidden');
         if (playText) playText.textContent = 'Play';
-        if (statusBadge) statusBadge.textContent = 'Ready to play';
+        if (statusBadge) statusBadge.textContent = voicesUnavailable ? 'Unavailable' : 'Ready to play';
         root?.classList.remove('is-playing');
         if (stopBtn) stopBtn.disabled = true;
       }
     }
 
-    playBtn?.addEventListener('click', (e) => {
+    playBtn?.addEventListener('click', async (e) => {
       e.preventDefault();
       if (!isPlaying) {
+        if (!synth.getVoices().length) {
+          const voices = await waitForVoices();
+          if (!voices.length) {
+            showUnavailable();
+            return;
+          }
+        }
         playCurrentPart();
       } else if (isPaused) {
         synth.resume();
@@ -464,6 +567,10 @@ const { selector = '.post-content', title = '', label = 'Listen to Article' } = 
       if (activeStickyObserver) {
         activeStickyObserver.disconnect();
         activeStickyObserver = null;
+      }
+      if (activeVoicesController) {
+        activeVoicesController.abort();
+        activeVoicesController = null;
       }
     });
   }
@@ -589,6 +696,20 @@ const { selector = '.post-content', title = '', label = 'Listen to Article' } = 
     border-color: var(--accent);
     color: var(--accent);
     font-weight: 600;
+  }
+
+  .audio-player-card.is-unavailable .audio-speaker-icon {
+    color: var(--text-muted);
+  }
+
+  .audio-unavailable-msg {
+    margin: 0 0 0.85rem 0;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    background-color: var(--bg-subtle);
+    border: 1px solid var(--border);
+    border-radius: 6px;
   }
 
   .audio-chevron-icon {

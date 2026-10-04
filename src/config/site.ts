@@ -84,7 +84,7 @@ export const siteConfig: SiteConfig = {
     search: true,
     tableOfContents: true,
     readingTime: true,
-    audioPlayer: true,
+    audioPlayer: false,
     tags: true,
     socialShare: true,
     themeSwitcher: true,
