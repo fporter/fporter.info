@@ -116,9 +116,17 @@ body {
 
 /* Links */
 a {
-  color: inherit;
+  color: none;
   text-decoration: none;
   transition: color 0.2s ease;
+}
+
+a:link {
+  color: #1a73e8;
+}
+
+a:visited {
+  color: #1a90e8;
 }
 
 a:hover {
