@@ -111,7 +111,7 @@ export const siteConfig: SiteConfig = {
     category: 'General',
     theme: 'auto',
     lang: 'auto',
-    clientId: '',
+    clientId: (typeof process !== 'undefined' && process.env?.GITHUB_CLIENT_ID) || (import.meta as any).env?.GITHUB_CLIENT_ID || '',
     // 🍃 DEFAULT: Showcase Mode (broker: '')
     // Out of the box, broker defaults to '' (empty). ScatterLeaf runs in an interactive,
     // safe sandbox with simulated mock comments in browser memory — zero external setup,
