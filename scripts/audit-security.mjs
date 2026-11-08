@@ -41,7 +41,7 @@ for (const file of srcFiles) {
   for (const pat of secretPatterns) {
     const match = content.match(pat.regex);
     if (match) {
-      findings.push({ severity: 'HIGH', category: 'Secret Leak', file: rel, detail: `Pattern ${pat.name} matched: "${match[0].slice(0, 50)}"` });
+      findings.push({ severity: 'HIGH', category: 'Secret Leak', file: rel, detail: `Pattern ${pat.name} matched (redacted): "${redacted}"` });
     }
   }
 }
@@ -65,6 +65,25 @@ for (const file of distFiles.filter(f => f.endsWith('.html'))) {
     }
   }
 }
+
+// 3. Lockfile & Dependency Version Hygiene
+if (fs.existsSync('package.json') && fs.existsSync('package-lock.json')) {
+  try {
+    const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+    const lock = JSON.parse(fs.readFileSync('package-lock.json', 'utf8'));
+    if (pkg.version && lock.version && pkg.version !== lock.version) {
+      findings.push({
+        severity: 'HIGH',
+        category: 'Lockfile Desync',
+        file: 'package-lock.json',
+        detail: `package.json version (${pkg.version}) does not match package-lock.json version (${lock.version}). Run "npm install" to synchronize.`
+      });
+    }
+  } catch (err) {
+    findings.push({ severity: 'MEDIUM', category: 'Parse Error', file: 'package.json', detail: `Could not parse package.json / package-lock.json: ${err.message}` });
+  }
+}
+
 
 console.log('=============================================');
 console.log('       DEVSECOPS SENTINEL AUDIT REPORT       ');
