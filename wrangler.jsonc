@@ -1,6 +1,6 @@
 {
   "name": "fporter-info",
-  "compatibility_date": "2026-10-03", // Update to the day you deploy
+  "compatibility_date": "2026-11-08", // Update to the day you deploy
   "assets": {
     "directory": "./dist"
   }
